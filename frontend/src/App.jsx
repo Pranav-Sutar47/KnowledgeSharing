@@ -1,11 +1,22 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Dashboard from './components/Dashboard';
+import Profile from './components/Profile';
+import PostDetail from './components/PostDetail'; 
+import MyPosts from './components/MyPosts';       
 
-function App() {
+const App = () => {
   return (
-    <div style={{ color: 'black', backgroundColor: 'white', padding: '2rem' }}>
-      <h1>Hello, Knowledge Sharing Platform is working!</h1>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+       
+        <Route path="/post/:author" element={<PostDetail />} /> 
+        <Route path="/myposts" element={<MyPosts />} />          
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
