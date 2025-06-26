@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   AppBar, Toolbar, Typography, TextField, Box,
   Fab, Avatar, Card, CardActionArea, Menu, MenuItem,
-  Divider, Grid, Paper, CardMedia
+  Divider, Grid, Paper, CardMedia, Button
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -112,6 +112,8 @@ const Dashboard = () => {
     </Card>
   );
 
+  const isLoggedIn = !!localStorage.getItem('accessToken');
+
   return (
     <>
       <AppBar position="static" sx={{ backgroundColor: '#0d47a1' }}>
@@ -119,34 +121,65 @@ const Dashboard = () => {
           <Typography variant="h6" fontWeight="bold">
             Knowledge Sharing Platform
           </Typography>
+
           <Box display="flex" alignItems="center" gap={2}>
             <TextField
               placeholder="Search teachers or students"
               size="small"
               sx={{ backgroundColor: 'white', borderRadius: 1 }}
             />
-            <NotificationsIcon style={{ color: 'white', cursor: 'pointer' }} />
-            <Avatar sx={{ bgcolor: 'orange', cursor: 'pointer' }} onClick={handleAvatarClick}>
-              U
-            </Avatar>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleCloseMenu}
-              PaperProps={{ elevation: 4, sx: { borderRadius: 2, mt: 1.5, minWidth: 200 } }}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-              <Box px={2} py={1}>
-                <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
-                  sdmaniitian@gmail.com
-                </Typography>
-              </Box>
-              <Divider />
-              <MenuItem onClick={() => handleNavigate('/profile')}>Profile</MenuItem>
-              <MenuItem onClick={() => handleNavigate('/myposts')}>My Posts</MenuItem>
-              <MenuItem onClick={() => handleNavigate('/logout')}>Logout</MenuItem>
-            </Menu>
+
+            {/* 🔔 Only show when logged in */}
+            {isLoggedIn && (
+              <NotificationsIcon style={{ color: 'white', cursor: 'pointer' }} />
+            )}
+
+            {isLoggedIn ? (
+              <>
+                <Avatar sx={{ bgcolor: 'orange', cursor: 'pointer' }} onClick={handleAvatarClick}>
+                  U
+                </Avatar>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleCloseMenu}
+                  PaperProps={{ elevation: 4, sx: { borderRadius: 2, mt: 1.5, minWidth: 200 } }}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                  <Box px={2} py={1}>
+                    <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                      sdmaniitian@gmail.com
+                    </Typography>
+                  </Box>
+                  <Divider />
+                  <MenuItem onClick={() => handleNavigate('/profile')}>Profile</MenuItem>
+                  <MenuItem onClick={() => handleNavigate('/myposts')}>My Posts</MenuItem>
+                  <MenuItem onClick={() => {
+                    localStorage.removeItem('accessToken');
+                    handleNavigate('/login');
+                  }}>Logout</MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <>
+                <Button
+                  onClick={() => navigate('/login')}
+                  variant="outlined"
+                  color="inherit"
+                  sx={{ borderColor: '#fff', color: '#fff' }}
+                >
+                  Login
+                </Button>
+                <Button
+                  onClick={() => navigate('/signup')}
+                  variant="contained"
+                  sx={{ bgcolor: '#fff', color: '#0d47a1' }}
+                >
+                  Sign Up
+                </Button>
+              </>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
