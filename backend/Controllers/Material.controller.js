@@ -1,5 +1,250 @@
 const asyncHandler = require('../Utils/asyncHandler');
+const cloudinary = require('../Config/Cloudinary');
+const fs = require('fs');
+const MaterialModel = require('../Models/Material.model');
+const APIResponse = require('../Utils/APIResponse');
+const APIError = require('../Utils/APIError');
+const fse = require('fs-extra');
+const UserModel = require('../Models/User.model');
 
 const addMaterial = asyncHandler(async(req,res)=>{
-    
+    const {title,
+      description,
+      access,
+      allowedBranches,
+      allowedClasses} = req.body;
+
+      const files = [];
+
+    for (let i = 0; i < req.files.length; i++) {
+      const file = req.files[i];
+
+      // Upload to Cloudinary
+      const cloudinaryResult = await cloudinary.uploader.upload(file.path, {
+        resource_type: "auto",
+        folder: "KnowledgeSharingMaterials"
+      });
+
+      files.push({
+        originalFileName: file.originalname,
+        localPath: file.path,
+        cloudinaryUrl: cloudinaryResult.secure_url,
+        type:'note', // fallback to 'note'
+        resourceType:cloudinaryResult.resource_type
+      });
+    }
+
+    const newMaterial = new MaterialModel({
+      title,
+      description,
+      uploadedBy: req.user.id,
+      access,
+      allowedBranches,
+      allowedClasses,
+      items: files
+    });
+
+    const result =  await newMaterial.save();
+    if(result)
+        return res.status(201).json(new APIResponse(201,newMaterial,'Material Uploaded successfully'));
+    else 
+        throw new APIError(400,'Error while uploading material');
 });
+
+const removeItem = asyncHandler(async(req,res)=>{
+    const { materialId, itemId } = req.body;
+    const material = await MaterialModel.findById(materialId);
+    if (!material) {
+        throw new APIError(404, 'Material not found');
+    }
+
+    const item = material.items.id(itemId);
+    if (!item) {
+        throw new APIError(404, 'Item not found in material');
+    }
+
+    try{
+        if(item.localPath && await fse.pathExists(item.localPath)){
+            await fse.remove(item.localPath);
+            console.log(`Local file removed: ${item.localPath}`);
+        }
+    }catch(err){
+        console.error('Error removing local file:', err);
+    }
+
+    try{
+        let publicId = item.cloudinaryPublicId;
+        if (!publicId && item.cloudinaryUrl) {
+            const urlParts = item.cloudinaryUrl.split('/');
+            const fileName = urlParts[urlParts.length - 1];
+            publicId = fileName.split('.')[0];
+        }
+
+        if (publicId) {
+            await cloudinary.uploader.destroy(publicId, { resource_type: item.resourceType });
+            console.log(`Cloudinary file removed: ${publicId}`);
+        }
+    }catch(err){
+        console.error('Error removing from Cloudinary:', err);
+    }
+
+    material.items.pull(itemId);
+    await material.save();
+
+    return res.status(200).json(new APIResponse(200, null, 'Item removed successfully from material'));
+
+});
+
+const removeMaterial = asyncHandler(async(req,res)=>{
+    const { materialId } = req.body;
+
+    const material = await MaterialModel.findById(materialId);
+    if (!material) {
+        throw new APIError(404, "Material not found");
+    }
+
+    for (const item of material.items) {
+        //Remove from locally
+        try {
+            if (item.localPath && await fse.pathExists(item.localPath)) {
+                await fse.remove(item.localPath);
+                console.log(`Removed locally: ${item.localPath}`);
+            }
+        } catch (err) {
+            console.error("Error removing local file:", err);
+        }
+
+        //Remove from Cloudinary
+        try {
+            let publicId = item.cloudinaryPublicId;
+            if (!publicId && item.cloudinaryUrl) {
+                const urlParts = item.cloudinaryUrl.split("/");
+                const fileName = urlParts[urlParts.length - 1];
+                publicId = fileName.split(".")[0];
+            }
+
+            const resourceType = item.resourceType || "image";
+
+            if (publicId) {
+                await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+                console.log(`Removed from Cloudinary: ${publicId} (${resourceType})`);
+            }
+        } catch (err) {
+            console.error("Error removing from Cloudinary:", err);
+        }
+    }
+
+    // Remove material document from DB
+    await material.deleteOne();
+
+    res.status(200).json(new APIResponse(200, null, "Material and all items removed successfully"));
+});
+
+const updateMaterial = asyncHandler(async(req,res)=>{
+    const { materialId } = req.body;
+    const { title, description, access, allowedBranches, allowedClasses } = req.body;
+
+    const material = await MaterialModel.findById(materialId);
+    if (!material) {
+        throw new APIError(404, "Material not found");
+    }
+
+    // Update fields if provided
+    if (title) material.title = title;
+    if (description) material.description = description;
+    if (access) material.access = access;
+    if (allowedBranches) material.allowedBranches = allowedBranches;
+    if (allowedClasses) material.allowedClasses = allowedClasses;
+
+    // Add new files if provided
+    if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+            const cloudinaryResult = await cloudinary.uploader.upload(file.path, {
+                resource_type: "auto",
+                folder: "KnowledgeSharingMaterials"
+            });
+
+            material.items.push({
+                originalName: file.originalname,
+                localPath: file.path,
+                cloudinaryUrl: cloudinaryResult.secure_url,
+                resourceType: cloudinaryResult.resource_type,
+                type:'note'
+            });
+        }
+    }
+
+    const updatedMaterial = await material.save();
+
+    res.status(200).json(new APIResponse(200, updatedMaterial, "Material updated successfully"));
+
+});
+
+// To fetch list of all uploads of student or faculty
+const getMaterialList = asyncHandler(async(req,res)=>{
+    const uid = req.user.id;
+    const list = await MaterialModel.find({uploadedBy:uid},
+        { title: 1, _id: 1, access: 1 }
+    ).sort({ createdAt: -1 });
+
+    return res.status(200).json(new APIResponse(200, list, "Material list fetched successfully"));
+});
+
+// To fetch specified material from the all uploades
+const getMaterial = asyncHandler(async(req,res)=>{
+    const {id} = req.query;
+    if(!id)
+        throw new APIError(404,'Provide material id');
+    const item = await MaterialModel.findById(id);
+    if(!item)
+        throw new APIError(404,'Invalid id item not found');
+    return res.status(200).json(new APIResponse(200,item,'Item fetched successfully'));
+});
+
+// To fetch list of material uploded by faculty as per access
+// Can be use by both student and faculty  
+const getFacultyMaterialListAsPerAccess = asyncHandler(async(req,res)=>{
+    const user = req.user;
+    const { id } = req.query; 
+
+    if (!id) {
+        throw new APIError(400, "UserId ID is required");
+    }
+
+    let list;
+    if (user.role === 'student') {
+        const student = await UserModel.findById(user.id).select('branch year');
+        
+        list = await MaterialModel.find({
+            uploadedBy: id,
+            $or: [
+                { access: 'allStudents' },
+                {
+                    access: 'specificBranchOrClass',
+                    $or: [
+                        { allowedBranches: student.branch },
+                        { allowedClasses: student.year }
+                    ]
+                }
+            ]
+        }).select('title _id access description');
+    } else {
+        // for faculty
+        list = await MaterialModel.find({
+            uploadedBy: id,
+            access: { $in: ['both', 'facultyOnly'] }
+        }).select('title _id access description');
+    }
+
+    res.status(200).json(new APIResponse(200, list, "Material list fetched as per access control"));
+});
+
+module.exports = {
+    addMaterial,
+    removeItem,
+    removeMaterial,
+    updateMaterial,
+    getMaterialList,
+    getMaterial,
+    getFacultyMaterialListAsPerAccess
+};

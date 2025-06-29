@@ -136,9 +136,43 @@ const refresh = asyncHandler(async(req,res)=>{
     });
 });
 
+const getAllFaculty = asyncHandler(async(req,res)=>{
+    const user = req.user;
+    let faculty;
+    if (user.role === 'faculty') {
+        faculty = await UserModel.find(
+            { role: 'faculty', _id: { $ne: user.id } }, // exclude current faculty
+            { name: 1, email: 1, _id: 1 } 
+        );
+    } else {
+        faculty = await UserModel.find(
+            { role: 'faculty' },
+            { name: 1, email: 1, _id: 1 }
+        );
+    }
+
+    res.status(200).json(new APIResponse(200, faculty, "Faculty list fetched successfully"));
+});
+
+const getAllStudent = asyncHandler(async(req,res)=>{
+    const user = req.user;
+    if (user.role === 'student') {
+        const students = await UserModel.find(
+            { role: 'student', _id: { $ne: user.id } }, // exclude current student
+            { name: 1, email: 1, _id: 1 } 
+        );
+        res.status(200).json(new APIResponse(200, students, "Student list fetched successfully"));
+
+    } else {
+        throw new APIError(400,'Faculty has no access to view students list');
+    }
+});
+
 module.exports = {
     login,
     refresh,
     logout,
-    signUp
+    signUp,
+    getAllFaculty,
+    getAllStudent
 };

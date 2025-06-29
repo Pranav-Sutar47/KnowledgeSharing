@@ -1,13 +1,14 @@
 const { USERDB } = require("../Config/DBConnection");
+const mongoose = require('mongoose');
 
 const MaterialSchema = new mongoose.Schema({
   title: String,
   description: String,
-  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
 
   access: {
     type: String,
-    enum: ['facultyOnly', 'allStudents', 'specificBranchOrClass'],
+    enum: ['facultyOnly', 'allStudents', 'specificBranchOrClass', 'both'],
     default: 'allStudents',
   },
   allowedBranches: [String],
@@ -18,10 +19,10 @@ const MaterialSchema = new mongoose.Schema({
       type: { type: String, enum: ['pdf', 'ppt', 'video', 'note', 'link'], required: true },
       originalFileName: String,   // the real name of the file uploaded
       storedFileName: String,     // the renamed/stored filename on server/cloud
-      fileUrl: String,            // location or URL
-      size: Number,               // optional: file size in bytes
-      noteContent: String,        // optional: for note type, raw text/markdown
+      cloudinaryUrl: String,            // location or URL
+      localPath: String,        // optional: for note type, raw text/markdown
       linkUrl: String,            // optional: for link type
+      resourceType:String,
       uploadedAt: { type: Date, default: Date.now },
     }
   ],
