@@ -26,6 +26,8 @@ app.use('/api/v1/material',require('./Routes/Material.routes'));
 
 app.use('/api/v1/folder',require('./Routes/Folder.routes'));
 
+app.use('/api/v1/doubt',require('./Routes/Doubt.routes'));
+
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
