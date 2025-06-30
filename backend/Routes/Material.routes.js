@@ -1,23 +1,32 @@
 const express = require('express');
 const { verifyJWT } = require('../Middlewares/Token');
 const upload  = require('../Config/MulterConfig');
-const { addMaterial, removeItem, removeMaterial, updateMaterial, getMaterialList, getMaterial, getFacultyMaterialListAsPerAccess } = require('../Controllers/Material.controller');
+const { addMaterial, removeItem, removeMaterial, updateMaterial, getMaterialList, getMaterial, getMaterialListFromFolder, getFacultyFoldersAndMaterials } = require('../Controllers/Material.controller');
 
 const router = express.Router();
 
+//Add material
 router.route('/add').post(verifyJWT,upload.array('material',10),addMaterial);
 
+//Remove item from material
 router.route('/remove-item').delete(verifyJWT,removeItem);
 
+//Remove material
 router.route('/remove').delete(verifyJWT,removeMaterial);
 
+//Update material
 router.route('/update').put(verifyJWT,upload.array('material',10),updateMaterial);
 
+//To get Folders and materials of student or faculty
 router.route('/get').get(verifyJWT,getMaterialList);
 
+//To get item from material
 router.route('/get-item').get(verifyJWT,getMaterial);
 
-router.route('/get-faculty-list').get(verifyJWT,getFacultyMaterialListAsPerAccess);
+//To get folders and material fo specified faculty
+router.route('/get-faculty-material-list').get(verifyJWT,getFacultyFoldersAndMaterials);
 
+//Get material list from folder
+router.route('/get-material-folder').get(verifyJWT,getMaterialListFromFolder);
 
 module.exports = router;

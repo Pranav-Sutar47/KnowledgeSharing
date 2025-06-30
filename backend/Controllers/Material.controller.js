@@ -6,13 +6,27 @@ const APIResponse = require('../Utils/APIResponse');
 const APIError = require('../Utils/APIError');
 const fse = require('fs-extra');
 const UserModel = require('../Models/User.model');
+const FolderModel = require('../Models/Folder.model');
 
 const addMaterial = asyncHandler(async(req,res)=>{
-    const {title,
+    let {title,
       description,
       access,
       allowedBranches,
-      allowedClasses} = req.body;
+      allowedClasses,
+      folderId
+    } = req.body;
+
+    if (folderId) {
+        const folderInfo = await FolderModel.findById(folderId);
+        if (!folderInfo) {
+            throw new APIError(404, 'Folder not found');
+        }
+
+        access = folderInfo.access || access;
+        allowedBranches = folderInfo.allowedBranches || allowedBranches;
+        allowedClasses = folderInfo.allowedClasses || allowedClasses;
+    }
 
       const files = [];
 
@@ -41,7 +55,8 @@ const addMaterial = asyncHandler(async(req,res)=>{
       access,
       allowedBranches,
       allowedClasses,
-      items: files
+      items: files,
+      folder:folderId || undefined
     });
 
     const result =  await newMaterial.save();
@@ -142,7 +157,7 @@ const removeMaterial = asyncHandler(async(req,res)=>{
 
 const updateMaterial = asyncHandler(async(req,res)=>{
     const { materialId } = req.body;
-    const { title, description, access, allowedBranches, allowedClasses } = req.body;
+    let { title, description, access, allowedBranches, allowedClasses, folderId } = req.body;
 
     const material = await MaterialModel.findById(materialId);
     if (!material) {
@@ -152,9 +167,18 @@ const updateMaterial = asyncHandler(async(req,res)=>{
     // Update fields if provided
     if (title) material.title = title;
     if (description) material.description = description;
-    if (access) material.access = access;
-    if (allowedBranches) material.allowedBranches = allowedBranches;
-    if (allowedClasses) material.allowedClasses = allowedClasses;
+    if(folderId){
+        const folderInfo = await FolderModel.findById(folderId);
+        if(!folderInfo)
+            throw new APIError(404,'Folder not found');
+        material.access = folderInfo.access || undefined;
+        material.allowedBranches = folderInfo.allowedBranches || undefined;
+        material.allowedClasses = folderInfo.allowedClasses || undefined;
+    }else{
+        if (access) material.access = access;
+        if (allowedBranches) material.allowedBranches = allowedBranches;
+        if (allowedClasses) material.allowedClasses = allowedClasses;
+    }
 
     // Add new files if provided
     if (req.files && req.files.length > 0) {
@@ -181,13 +205,44 @@ const updateMaterial = asyncHandler(async(req,res)=>{
 });
 
 // To fetch list of all uploads of student or faculty
-const getMaterialList = asyncHandler(async(req,res)=>{
+const getMaterialList = asyncHandler(async (req, res) => {
     const uid = req.user.id;
-    const list = await MaterialModel.find({uploadedBy:uid},
-        { title: 1, _id: 1, access: 1 }
-    ).sort({ createdAt: -1 });
 
-    return res.status(200).json(new APIResponse(200, list, "Material list fetched successfully"));
+    // Fetch all folders of the user
+    const folders = await FolderModel.find({ createdBy: uid })
+        .select("name _id access createdAt")
+        .sort({ createdAt: -1 });
+
+    // Fetch materials uploaded by user without folder
+    const materialsWithoutFolder = await MaterialModel.find({
+        uploadedBy: uid,
+        folder: { $exists: false }
+    }, {
+        title: 1,
+        _id: 1,
+        access: 1,
+        createdAt: 1
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json(new APIResponse(200, {
+        folders,
+        materialsWithoutFolder
+    }, "Folders and materials without folder fetched successfully"));
+});
+
+//Get materials from specified folder
+const getMaterialListFromFolder = asyncHandler(async(req,res)=>{
+    const {folderId} = req.query;
+    if (!folderId) {
+        throw new APIError(400, "Folder ID is required");
+    }
+
+    const materialsList = await MaterialModel.find({ folder: folderId })
+        .select("title _id access createdAt")
+        .sort({ createdAt: -1 });
+        
+    return res.status(200).json(new APIResponse(200,materialsList,'Material from folder'));
+
 });
 
 // To fetch specified material from the all uploades
@@ -203,41 +258,60 @@ const getMaterial = asyncHandler(async(req,res)=>{
 
 // To fetch list of material uploded by faculty as per access
 // Can be use by both student and faculty  
-const getFacultyMaterialListAsPerAccess = asyncHandler(async(req,res)=>{
+const getFacultyFoldersAndMaterials = asyncHandler(async (req, res) => {
     const user = req.user;
-    const { id } = req.query; 
+    const { id } = req.query; // faculty id
 
     if (!id) {
-        throw new APIError(400, "UserId ID is required");
+        throw new APIError(400, "Faculty ID is required");
     }
 
-    let list;
+    let folderFilter = { createdBy: id };
+    let materialFilter = { uploadedBy: id };
+
     if (user.role === 'student') {
         const student = await UserModel.findById(user.id).select('branch year');
-        
-        list = await MaterialModel.find({
-            uploadedBy: id,
-            $or: [
-                { access: 'allStudents' },
-                {
-                    access: 'specificBranchOrClass',
-                    $or: [
-                        { allowedBranches: student.branch },
-                        { allowedClasses: student.year }
-                    ]
-                }
-            ]
-        }).select('title _id access description');
+
+        materialFilter.$or = [
+            { access: 'allStudents' },
+            {
+                access: 'specificBranchOrClass',
+                $or: [
+                    { allowedBranches: student.branch },
+                    { allowedClasses: student.year }
+                ]
+            }
+        ];
+
+        folderFilter.$or = [
+            { access: 'allStudents' },
+            {
+                access: 'specificBranchOrClass',
+                $or: [
+                    { allowedBranches: student.branch },
+                    { allowedClasses: student.year }
+                ]
+            }
+        ];
     } else {
-        // for faculty
-        list = await MaterialModel.find({
-            uploadedBy: id,
-            access: { $in: ['both', 'facultyOnly'] }
-        }).select('title _id access description');
+        // for faculty or admin
+        materialFilter.access = { $in: ['both', 'facultyOnly'] };
+        folderFilter.access = { $in: ['both', 'facultyOnly'] };
     }
 
-    res.status(200).json(new APIResponse(200, list, "Material list fetched as per access control"));
+    const folders = await FolderModel.find(folderFilter)
+        .select("name _id access description createdAt")
+        .sort({ createdAt: -1 });
+
+    const materials = await MaterialModel.find(materialFilter)
+        .select("title _id access description folder createdAt")
+        .sort({ createdAt: -1 });
+
+    return res.status(200).json(
+        new APIResponse(200, { folders, materials }, "Faculty folders and materials fetched successfully")
+    );
 });
+
 
 module.exports = {
     addMaterial,
@@ -246,5 +320,6 @@ module.exports = {
     updateMaterial,
     getMaterialList,
     getMaterial,
-    getFacultyMaterialListAsPerAccess
+    getFacultyFoldersAndMaterials,
+    getMaterialListFromFolder,
 };

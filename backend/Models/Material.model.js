@@ -28,6 +28,10 @@ const MaterialSchema = new mongoose.Schema({
   ],
 
   createdAt: { type: Date, default: Date.now },
+  folder:{
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Folders'
+  }
 });
 
 const MaterialModel = USERDB.model('Material',MaterialSchema);
