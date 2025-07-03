@@ -136,37 +136,69 @@ const refresh = asyncHandler(async(req,res)=>{
     });
 });
 
-const getAllFaculty = asyncHandler(async(req,res)=>{
+const getAllFaculty = asyncHandler(async (req, res) => {
     const user = req.user;
-    let faculty;
+    const page = parseInt(req.query.page) || 1;   // default page 1
+    const limit = parseInt(req.query.limit) || 10; // default 10 per page
+    const skip = (page - 1) * limit;
+
+    let filter = { role: 'faculty' };
     if (user.role === 'faculty') {
-        faculty = await UserModel.find(
-            { role: 'faculty', _id: { $ne: user.id } }, // exclude current faculty
-            { name: 1, email: 1, _id: 1 } 
-        );
-    } else {
-        faculty = await UserModel.find(
-            { role: 'faculty' },
-            { name: 1, email: 1, _id: 1 }
-        );
+        filter._id = { $ne: user.id }; // exclude current faculty
     }
 
-    res.status(200).json(new APIResponse(200, faculty, "Faculty list fetched successfully"));
+    const [faculty, total] = await Promise.all([
+        UserModel.find(filter, { name: 1, email: 1, _id: 1 })
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 }),
+        UserModel.countDocuments(filter)
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).json(new APIResponse(200, {
+        faculty,
+        total,
+        page,
+        totalPages
+    }, "Faculty list fetched successfully with pagination"));
 });
 
-const getAllStudent = asyncHandler(async(req,res)=>{
+
+const getAllStudent = asyncHandler(async (req, res) => {
     const user = req.user;
-    if (user.role === 'student') {
-        const students = await UserModel.find(
-            { role: 'student', _id: { $ne: user.id } }, // exclude current student
-            { name: 1, email: 1, _id: 1 } 
-        );
-        res.status(200).json(new APIResponse(200, students, "Student list fetched successfully"));
-
-    } else {
-        throw new APIError(400,'Faculty has no access to view students list');
+    if (user.role !== 'student') {
+        throw new APIError(400, 'Faculty has no access to view students list');
     }
+
+    const page = parseInt(req.query.page) || 1;   // default page = 1
+    const limit = parseInt(req.query.limit) || 10; // default limit = 10
+    const skip = (page - 1) * limit;
+
+    const filter = {
+        role: 'student',
+        _id: { $ne: user.id } // exclude current student
+    };
+
+    const [students, total] = await Promise.all([
+        UserModel.find(filter, { name: 1, email: 1, _id: 1 })
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 }),
+        UserModel.countDocuments(filter)
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).json(new APIResponse(200, {
+        students,
+        total,
+        page,
+        totalPages
+    }, "Student list fetched successfully with pagination"));
 });
+
 
 module.exports = {
     login,
