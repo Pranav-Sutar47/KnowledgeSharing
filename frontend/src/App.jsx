@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
+import StudentsDashboard from './components/StudentsDashboard'; // ✅ Add this import
 import Profile from './components/Profile';
 import PostDetail from './components/PostDetail';
 import MyPosts from './components/MyPosts';
@@ -13,6 +14,8 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} /> {/* ✅ Fix route for Teacher Dashboard */}
+        <Route path="/students" element={<StudentsDashboard />} /> {/* ✅ Route for Students Dashboard */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />

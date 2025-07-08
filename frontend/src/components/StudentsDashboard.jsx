@@ -7,7 +7,7 @@ import {
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard = () => {
+const StudentsDashboard = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
@@ -19,12 +19,12 @@ const Dashboard = () => {
     navigate(path);
   };
 
-  const teachers = [
-    { name: "Mehzabin Pathan", color: "#0d47a1", img: "mehzabin.jpg" },
-    { name: "Suwarna Gothane", color: "#6a1b9a", img: "suwarna.jpg" },
-    { name: "Anagha Chaudhari", color: "#1b5e20", img: "anagha.jpg" },
-    { name: "Rahul Bhosale", color: "#bf360c", img: "rahul.jpg" },
-    { name: "Anjali Pawar", color: "#01579b", img: "anjali.jpg" },
+  const students = [
+    { name: "Saurabh Mali", color: "#2e7d32", img: "saurabh.jpg" },
+    { name: "Rahul Jagtap", color: "#b71c1c", img: "rahulj.jpg" },
+    { name: "Riya Singh", color: "#006064", img: "riya.jpg" },
+    { name: "Amit Patil", color: "#4a148c", img: "amit.jpg" },
+    { name: "Neha Desai", color: "#f57f17", img: "neha.jpg" },
   ];
 
   const renderCard = (person) => (
@@ -151,25 +151,8 @@ const Dashboard = () => {
           </Typography>
         </Box>
 
-        {/* Toggle Buttons */}
+        {/* Toggle Buttons (Styled to match Teachers') */}
         <Box display="flex" justifyContent="center" mb={4}>
-          <Button
-            variant="contained"
-            sx={{
-              borderRadius: '999px',
-              mx: 1,
-              backgroundColor: '#3f51b5',
-              color: 'white',
-              textTransform: 'uppercase',
-              fontWeight: 'bold',
-              '&:hover': {
-                backgroundColor: '#303f9f'
-              }
-            }}
-            onClick={() => navigate('/dashboard')}
-          >
-            Teachers' Posts
-          </Button>
           <Button
             variant="outlined"
             sx={{
@@ -184,19 +167,37 @@ const Dashboard = () => {
                 borderColor: '#3f51b5'
               }
             }}
+            onClick={() => navigate('/dashboard')}
+          >
+            Teachers' Posts
+          </Button>
+
+          <Button
+            variant="contained"
+            sx={{
+              borderRadius: '999px',
+              mx: 1,
+              backgroundColor: '#3f51b5',
+              color: 'white',
+              textTransform: 'uppercase',
+              fontWeight: 'bold',
+              '&:hover': {
+                backgroundColor: '#303f9f'
+              }
+            }}
             onClick={() => navigate('/students')}
           >
             Students' Posts
           </Button>
         </Box>
 
-        {/* Teachers Section */}
+        {/* Students Section */}
         <Box mb={6}>
           <Typography variant="h5" fontWeight="bold" mb={2}>
-            🧑‍🏫 Teachers' Shared Content
+            🎓 Students' Shared Content
           </Typography>
           <Grid container spacing={2} justifyContent="center">
-            {teachers.map(renderCard)}
+            {students.map(renderCard)}
           </Grid>
         </Box>
 
@@ -231,4 +232,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default StudentsDashboard;

@@ -18,12 +18,19 @@ const Profile = () => {
     year: 'II'
   });
 
-  const handleToggleEdit = () => {
-    setEditable(!editable);
-  };
+  const handleToggleEdit = () => setEditable(!editable);
 
   const handleChange = (field, value) => {
-    setProfile({ ...profile, [field]: value });
+    // If role changes to Teacher, clear academic year
+    if (field === 'role') {
+      setProfile((prev) => ({
+        ...prev,
+        [field]: value,
+        year: value === 'Student' ? prev.year || 'I' : ''
+      }));
+    } else {
+      setProfile((prev) => ({ ...prev, [field]: value }));
+    }
   };
 
   const fieldLabels = {
@@ -78,39 +85,43 @@ const Profile = () => {
         </Box>
 
         {/* Profile Fields */}
-        {Object.keys(profile).map((field) => (
-          <Box key={field} mb={2}>
-            <Typography fontWeight="500" fontSize="1.1rem" mb={1}>
-              {fieldLabels[field]}
-            </Typography>
+        {Object.keys(profile).map((field) => {
+          if (field === 'year' && profile.role !== 'Student') return null;
 
-            {field === 'role' || field === 'year' ? (
-              <FormControl fullWidth disabled={!editable}>
-                <Select
+          return (
+            <Box key={field} mb={2}>
+              <Typography fontWeight="500" fontSize="1.1rem" mb={1}>
+                {fieldLabels[field]}
+              </Typography>
+
+              {field === 'role' || field === 'year' ? (
+                <FormControl fullWidth disabled={!editable}>
+                  <Select
+                    value={profile[field]}
+                    onChange={(e) => handleChange(field, e.target.value)}
+                    size="small"
+                  >
+                    {(field === 'role' ? roleOptions : yearOptions).map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ) : (
+                <TextField
+                  fullWidth
+                  size="large"
                   value={profile[field]}
                   onChange={(e) => handleChange(field, e.target.value)}
-                  size="small"
-                >
-                  {(field === 'role' ? roleOptions : yearOptions).map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            ) : (
-              <TextField
-                fullWidth
-                size="large"
-                value={profile[field]}
-                onChange={(e) => handleChange(field, e.target.value)}
-                disabled={!editable}
-                type={field === 'password' ? 'password' : 'text'}
-                InputProps={{ sx: { fontSize: '1.1rem', py: 1.5 } }}
-              />
-            )}
-          </Box>
-        ))}
+                  disabled={!editable}
+                  type={field === 'password' ? 'password' : 'text'}
+                  InputProps={{ sx: { fontSize: '1.1rem', py: 1.5 } }}
+                />
+              )}
+            </Box>
+          );
+        })}
 
         {editable && (
           <Box mt={4} display="flex" justifyContent="center">
