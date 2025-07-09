@@ -199,6 +199,48 @@ const getAllStudent = asyncHandler(async (req, res) => {
     }, "Student list fetched successfully with pagination"));
 });
 
+const getFaculty = asyncHandler(async(req,res)=>{
+    const {name} = req.query;
+    if (!name) 
+        throw new APIError(404,'Name is required');
+    const faculties = await UserModel.find({
+        name: { $regex: name, $options: 'i' },
+        role: 'faculty'
+    });
+    return res.status(200).json(new APIResponse(200,faculties,'Fetched sucessfully'));
+});
+
+const getStudent = asyncHandler(async(req,res)=>{
+    const {name} = req.query;
+    if (!name) 
+        throw new APIError(404,'Name is required');
+    const students = await UserModel.find({
+        name: { $regex: name, $options: 'i' },
+        role: 'student'
+    });
+    return res.status(200).json(new APIResponse(200,students,'Fetched sucessfully'));
+});
+
+const updateStudentProfile = asyncHandler(async(req,res)=>{
+    const {year,branch} = req.body;
+    const user = req.user;
+    const student = await UserModel.findById(user.id);
+    if(!student)
+        throw new APIError(404,'Student not found');
+    
+    const currentYear = student.year;
+    if(branch){
+        if(currentYear === 'FE')
+            student.branch = branch;
+        else
+            throw new APIError(400,'Branch can not be updated after SE');
+    }
+    if(year)
+        student.year = year;
+    await student.save();
+    
+    return res.status(200).json(new APIResponse(200, student, 'Student profile updated successfully'));
+});
 
 module.exports = {
     login,
@@ -206,5 +248,8 @@ module.exports = {
     logout,
     signUp,
     getAllFaculty,
-    getAllStudent
+    getAllStudent,
+    getStudent,
+    getFaculty,
+    updateStudentProfile
 };

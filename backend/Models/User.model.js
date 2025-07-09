@@ -26,12 +26,22 @@ const userSchema = mongoose.Schema({
     },
     branch: {
         type :String,
+        enum: [
+            'Computer Engineering',
+            'Information Technology',
+            'Civil Engineering',
+            'Mechanical Engineering',
+            'Electronics and Telecommunication Engineering',
+            'Computer Science Engineering (AIML)',
+            'Computer Engineering Regional'
+        ],
         required : function () {
             return this.role === 'student'
         }
     },
     year: {
         type : String,
+        enum: ['FE', 'SE', 'TE', 'BE'],
         required : function () {
             return this.role === 'student'
         }
