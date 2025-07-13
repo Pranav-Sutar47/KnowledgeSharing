@@ -33,7 +33,8 @@ const userSchema = mongoose.Schema({
             'Mechanical Engineering',
             'Electronics and Telecommunication Engineering',
             'Computer Science Engineering (AIML)',
-            'Computer Engineering Regional'
+            'Computer Engineering Regional',
+            'Electronics Engineering'
         ],
         required : function () {
             return this.role === 'student'
