@@ -190,7 +190,7 @@ const updateMaterial = asyncHandler(async(req,res)=>{
 
             material.items.push({
                 originalName: file.originalname,
-                localPath: file.path,
+                localPath: file.path || null,
                 cloudinaryUrl: cloudinaryResult.secure_url,
                 resourceType: cloudinaryResult.resource_type,
                 type:'note'

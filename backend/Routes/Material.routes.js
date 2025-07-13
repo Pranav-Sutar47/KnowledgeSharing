@@ -16,7 +16,8 @@ router.route('/remove-item').delete(verifyJWT,removeItem);
 router.route('/remove').delete(verifyJWT,removeMaterial);
 
 //Update material
-router.route('/update').put(verifyJWT,upload.array('material',10),updateMaterial);
+//upload.array('material',10)
+router.route('/update').put(verifyJWT,updateMaterial);
 
 //To get Folders and materials of student or faculty
 router.route('/get').get(verifyJWT,getMaterialList);
