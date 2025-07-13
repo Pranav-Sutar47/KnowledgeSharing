@@ -1,4 +1,5 @@
-export const API_BASE_URL = 'http://localhost:5000/api/v1';
+export const API_BASE_URL = 'https://knowledgesharing-6rhl.onrender.com/api/v1'
+//'http://localhost:5000/api/v1';
 
 export const ROLES = {
   TEACHER: 'faculty',
