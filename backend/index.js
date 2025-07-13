@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const APIError = require('./Utils/APIError');
-const { default: axios } = require('axios');
 
 const app = express();
 
@@ -20,10 +19,6 @@ app.use(cors({
 app.use(cookieParser());
 
 app.use(express.json());
-
-app.get('/ping', (req, res) => {
-    res.status(200).send('pong');
-});
 
 app.use('/api/v1/user',require('./Routes/User.routes'));
 
@@ -50,18 +45,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// app.listen(process.env.PORT,()=>{
-//     console.log(`Server is up and listing on port ${process.env.PORT}`);
-// });
-
-const SERVER_URL = `http://localhost:${process.env.PORT}/ping`;
-
-app.listen(process.env.PORT,'0.0.0.0',()=>{
-    console.log(`Server Up and Listen on ${process.env.PORT}`);
-    setInterval(() => {
-            axios
-            .get(SERVER_URL)
-            .then(() => console.log("Self-ping successful"))
-            .catch((err) => console.error("Self-ping failed:", err.message));
-    },  3*60*1000);
+app.listen(process.env.PORT,()=>{
+    console.log(`Server is up and listing on port ${process.env.PORT}`);
 });

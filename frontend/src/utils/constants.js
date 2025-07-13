@@ -1,0 +1,25 @@
+export const API_BASE_URL = 'http://localhost:5000/api/v1';
+
+export const ROLES = {
+  TEACHER: 'faculty',
+  STUDENT: 'student'
+};
+
+export const ACCESS_LEVELS = {
+  FACULTY_ONLY: 'facultyOnly',
+  ALL_STUDENTS: 'allStudents',
+  SPECIFIC_BRANCH_OR_CLASS: 'specificBranchOrClass',
+  BOTH: 'both'
+};
+
+export const BRANCHES = [
+  'Computer Engineering',
+  'Information Technology',
+  'Electronics Engineering',
+  'Mechanical Engineering',
+  'Civil Engineering'
+];
+
+export const CLASSES = [
+  'FE', 'SE', 'TE', 'BE'
+];
