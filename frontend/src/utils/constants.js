@@ -16,9 +16,12 @@ export const ACCESS_LEVELS = {
 export const BRANCHES = [
   'Computer Engineering',
   'Information Technology',
-  'Electronics Engineering',
+  'Civil Engineering',
   'Mechanical Engineering',
-  'Civil Engineering'
+  'Electronics and Telecommunication Engineering',
+  'Computer Science Engineering (AIML)',
+  'Computer Engineering Regional',
+  'Electronics Engineering'
 ];
 
 export const CLASSES = [
