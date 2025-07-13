@@ -41,7 +41,7 @@ const addMaterial = asyncHandler(async(req,res)=>{
 
       files.push({
         originalFileName: file.originalname,
-        localPath: file.path,
+        localPath: file.path || null,
         cloudinaryUrl: cloudinaryResult.secure_url,
         type:'note', // fallback to 'note'
         resourceType:cloudinaryResult.resource_type

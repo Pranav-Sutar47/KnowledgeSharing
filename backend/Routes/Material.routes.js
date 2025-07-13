@@ -6,7 +6,8 @@ const { addMaterial, removeItem, removeMaterial, updateMaterial, getMaterialList
 const router = express.Router();
 
 //Add material
-router.route('/add').post(verifyJWT,upload.array('material',10),addMaterial);
+//upload.array('material',10),
+router.route('/add').post(verifyJWT,addMaterial);
 
 //Remove item from material
 router.route('/remove-item').delete(verifyJWT,removeItem);
