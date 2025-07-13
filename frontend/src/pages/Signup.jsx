@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Container,
   Paper,
@@ -13,57 +13,57 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid
-} from '@mui/material';
-import { School } from '@mui/icons-material';
-import { useAuth } from '../features/auth/AuthContext';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { ROLES, BRANCHES, CLASSES } from '../utils/constants';
+  Grid,
+} from "@mui/material";
+import { School } from "@mui/icons-material";
+import { useAuth } from "../features/auth/AuthContext";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { ROLES, BRANCHES, CLASSES } from "../utils/constants";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: '',
-    branch: '',
-    year: ''
+    name: "",
+    email: "",
+    password: "",
+    role: "",
+    branch: "",
+    year: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const { signup } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       const result = await signup(formData);
       if (result.success) {
-        setSuccess('Account created successfully! Please login.');
+        setSuccess("Account created successfully! Please login.");
         // Auto-login after successful signup
         const role = result.data.user.role;
-        if (role === 'faculty') {
-          navigate('/teacher/dashboard');
+        if (role === "faculty") {
+          navigate("/teacher/dashboard");
         } else {
-          navigate('/student/dashboard');
+          navigate("/student/dashboard");
         }
       } else {
         setError(result.message);
       }
     } catch (error) {
-      setError('Signup failed. Please try again.');
+      setError("Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -74,25 +74,43 @@ const Signup = () => {
       <Box
         sx={{
           marginTop: { xs: 4, sm: 8 },
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <Paper elevation={3} sx={{ padding: { xs: 2, sm: 4 }, width: '100%' }}>
+        <Paper elevation={3} sx={{ padding: { xs: 2, sm: 4 }, width: "100%" }}>
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              mb: { xs: 2, sm: 3 }
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              mb: { xs: 2, sm: 3 },
             }}
           >
-            <School sx={{ fontSize: { xs: 32, sm: 40 }, color: 'primary.main', mb: 2 }} />
-            <Typography component="h1" variant="h4" gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
+            <School
+              sx={{
+                fontSize: { xs: 32, sm: 40 },
+                color: "primary.main",
+                mb: 2,
+              }}
+            />
+            <Typography
+              component="h1"
+              variant="h4"
+              gutterBottom
+              sx={{ fontSize: { xs: "1.75rem", sm: "2.125rem" } }}
+            >
               EduShare
             </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, textAlign: 'center' }}>
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              sx={{
+                fontSize: { xs: "1rem", sm: "1.25rem" },
+                textAlign: "center",
+              }}
+            >
               Create your account
             </Typography>
           </Box>
@@ -144,8 +162,12 @@ const Signup = () => {
               autoComplete="new-password"
               value={formData.password}
               onChange={handleChange}
+              inputProps={{
+                maxLength: 8,
+                minLength: 4,
+              }}
             />
-            
+
             <FormControl fullWidth margin="normal" required>
               <InputLabel>Role</InputLabel>
               <Select
@@ -177,8 +199,8 @@ const Signup = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              
-              {formData.role === 'student' && (
+
+              {formData.role === "student" && (
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth margin="normal" required>
                     <InputLabel>Year</InputLabel>
@@ -206,9 +228,9 @@ const Signup = () => {
               sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
-              {loading ? <CircularProgress size={24} /> : 'Sign Up'}
+              {loading ? <CircularProgress size={24} /> : "Sign Up"}
             </Button>
-            <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ textAlign: "center" }}>
               <Link component={RouterLink} to="/login" variant="body2">
                 Already have an account? Sign In
               </Link>
