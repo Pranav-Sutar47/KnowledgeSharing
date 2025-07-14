@@ -459,27 +459,24 @@ const getFacultyFoldersAndMaterials = asyncHandler(async (req, res) => {
   if (user.role === "student") {
     const student = await UserModel.findById(user.id).select("branch year");
 
-    materialFilter.$or = [
-      { access: "allStudents" },
-      {
-        access: "specificBranchOrClass",
-        $or: [
-          { allowedBranches: student.branch },
-          { allowedClasses: student.year },
-        ],
-      },
-    ];
+  materialFilter.$or = [
+    { access: "allStudents" },
+    {
+      access: "specificBranchOrClass",
+      allowedBranches: student.branch,
+      allowedClasses: student.year,
+    },
+  ];
 
-    folderFilter.$or = [
-      { access: "allStudents" },
-      {
-        access: "specificBranchOrClass",
-        $or: [
-          { allowedBranches: student.branch },
-          { allowedClasses: student.year },
-        ],
-      },
-    ];
+  folderFilter.$or = [
+    { access: "allStudents" },
+    {
+      access: "specificBranchOrClass",
+      allowedBranches: student.branch,
+      allowedClasses: student.year,
+    },
+  ];
+
   } else {
     // for faculty or admin
     materialFilter.access = { $in: ["both", "facultyOnly"] };
