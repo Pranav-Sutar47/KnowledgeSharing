@@ -26,7 +26,7 @@ const PostMaterial = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    access: 'allStudents',
+    access: '',
     allowedBranches: [],
     allowedClasses: [],
     folderId: ''
@@ -112,6 +112,8 @@ const PostMaterial = () => {
         submitData.append('material', file);
       });
 
+
+
       // Log what we're sending
       console.log('Submitting material with:', {
         title: formData.title,
@@ -120,6 +122,7 @@ const PostMaterial = () => {
         access: formData.access,
         filesCount: files.length
       });
+
       const result = await materialService.addMaterial(submitData);
       if (result.success) {
         setSuccess('Material posted successfully!');

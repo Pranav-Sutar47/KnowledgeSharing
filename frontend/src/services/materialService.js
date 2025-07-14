@@ -7,8 +7,6 @@ class MaterialService {
   async addMaterial(formData) {
     try {
       // Log the formData for debugging
-      console.log('Uploading material with formData:', formData);
-      
       const response = await axios.post(`${API_URL}/add`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
