@@ -7,7 +7,7 @@ const router = express.Router();
 
 //Add material
 //upload.array('material',10),
-router.route('/add').post(verifyJWT,addMaterial);
+router.route('/add').post(verifyJWT,upload.array('material',10),addMaterial);
 
 //Remove item from material
 router.route('/remove-item').delete(verifyJWT,removeItem);
@@ -17,7 +17,7 @@ router.route('/remove').delete(verifyJWT,removeMaterial);
 
 //Update material
 //upload.array('material',10)
-router.route('/update').put(verifyJWT,updateMaterial);
+router.route('/update').put(verifyJWT,upload.array('material',10),updateMaterial);
 
 //To get Folders and materials of student or faculty
 router.route('/get').get(verifyJWT,getMaterialList);
