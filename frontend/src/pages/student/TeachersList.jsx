@@ -67,53 +67,64 @@ const TeachersList = () => {
   );
 
   const TeacherCard = ({ teacher }) => (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', minHeight: { xs: 200, sm: 220 } }}>
-      <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
+    //  Explicit width and height are set for every card.
+    <Card sx={{ width: 250, height: 290, display: 'flex', flexDirection: 'column' }}>
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          overflow: 'hidden',
+        }}
+      >
         <Avatar
-          sx={{ 
-            width: { xs: 60, sm: 80 }, 
-            height: { xs: 60, sm: 80 }, 
-            mx: 'auto', 
+          sx={{
+            width: 80,
+            height: 80,
             mb: 2,
             bgcolor: 'primary.main',
-            fontSize: { xs: '1.5rem', sm: '2rem' }
+            fontSize: '2rem'
           }}
         >
           {teacher.name?.charAt(0) || 'T'}
         </Avatar>
-        
-        <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+
+        <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
           {teacher.name}
         </Typography>
-        
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
+
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '90%',
           mb: 2,
-          flexWrap: 'wrap'
         }}>
-          <Email sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-          <Typography variant="body2" color="text.secondary" sx={{ 
-            fontSize: { xs: '0.75rem', sm: '0.875rem' },
-            wordBreak: 'break-word'
-          }}>
+          <Email sx={{ mr: 1, fontSize: 16, color: 'text.secondary', flexShrink: 0 }} />
+          {/*  `noWrap` forces single-line text with ellipsis (...) */}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            noWrap
+            title={teacher.email}
+          >
             {teacher.email}
           </Typography>
         </Box>
-        
-        <Chip 
-          label="Faculty" 
-          size="small" 
-          color="primary" 
+
+        <Chip
+          label="Faculty"
+          size="small"
+          color="primary"
           sx={{ mt: 1 }}
         />
       </CardContent>
-      
+
       <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
-        <Button 
-          variant="contained" 
-          size={window.innerWidth < 600 ? "small" : "medium"}
+        <Button
+          variant="contained"
           onClick={() => handleViewTeacher(teacher)}
         >
           View Materials
@@ -124,24 +135,20 @@ const TeachersList = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
+      <Typography variant="h4" gutterBottom>
         Teachers Directory
       </Typography>
-      
-      <Typography variant="body1" color="text.secondary" sx={{ 
-        mb: 3,
-        fontSize: { xs: '0.875rem', sm: '1rem' }
-      }}>
+
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
         Browse and access materials shared by your teachers
       </Typography>
-      
+
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
 
-      {/* Search Bar */}
       <Box sx={{ mb: 3, width: '100%' }}>
         <TextField
           fullWidth
@@ -159,54 +166,46 @@ const TeachersList = () => {
         />
       </Box>
 
-      {/* Stats */}
       <Box sx={{ mb: 3 }}>
-        <Typography color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+        <Typography color="text.secondary">
           {loading ? 'Loading...' : `${total} teachers available`}
         </Typography>
       </Box>
 
-      {/* Teachers Grid */}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <CircularProgress />
         </Box>
       ) : filteredTeachers.length > 0 ? (
         <>
-          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
+          <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
             {filteredTeachers.map((teacher) => (
-              <Grid item xs={12} sm={6} lg={4} xl={3} key={teacher._id}>
+              //  Using "auto" lets the grid item size itself to the card's fixed width.
+              <Grid item key={teacher._id}>
                 <TeacherCard teacher={teacher} />
               </Grid>
             ))}
           </Grid>
-          
-          {/* Pagination */}
+
           {totalPages > 1 && (
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'center',
               mt: 4,
-              '& .MuiPagination-root': {
-                '& .MuiPaginationItem-root': {
-                  fontSize: { xs: '0.75rem', sm: '0.875rem' }
-                }
-              }
             }}>
               <Pagination
                 count={totalPages}
                 page={currentPage}
                 onChange={handlePageChange}
                 color="primary"
-                size={window.innerWidth < 600 ? "small" : "medium"}
               />
             </Box>
           )}
         </>
       ) : (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-        <School sx={{ fontSize: { xs: 60, sm: 80 }, color: 'text.secondary', mb: 2 }} />
-        <Typography variant="h6" color="text.secondary" gutterBottom sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+          <School sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
             {searchTerm ? 'No teachers found' : 'No teachers available'}
           </Typography>
           <Typography color="text.secondary">

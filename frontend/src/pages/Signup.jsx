@@ -1,245 +1,188 @@
 import React, { useState } from "react";
 import {
   Container,
-  Paper,
+  Box,
+  Typography,
   TextField,
   Button,
-  Typography,
-  Box,
-  Alert,
-  CircularProgress,
-  Link,
-  FormControl,
-  InputLabel,
   Select,
   MenuItem,
-  Grid,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
-import { School } from "@mui/icons-material";
-import { useAuth } from "../features/auth/AuthContext";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
-import { ROLES, BRANCHES, CLASSES } from "../utils/constants";
 
-const Signup = () => {
+const BRANCHES = [
+  "Computer",
+  "Mechanical",
+  "Electrical",
+  "Civil",
+  "Electronics",
+  "IT",
+];
+const CLASSES = ["FE", "SE", "TE", "BE"];
+
+const SignupForm = () => {
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     password: "",
     role: "",
     branch: "",
     year: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const { signup } = useAuth();
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "role" && value !== "student" ? { year: "" } : {}),
+    }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      const result = await signup(formData);
-      if (result.success) {
-        setSuccess("Account created successfully! Please login.");
-        // Auto-login after successful signup
-        const role = result.data.user.role;
-        if (role === "faculty") {
-          navigate("/teacher/dashboard");
-        } else {
-          navigate("/student/dashboard");
-        }
-      } else {
-        setError(result.message);
-      }
-    } catch (error) {
-      setError("Signup failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    console.log(formData);
   };
 
   return (
-    <Container component="main" maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
+    <Container maxWidth="sm">
       <Box
         sx={{
-          marginTop: { xs: 4, sm: 8 },
+          marginTop: 8,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          backgroundColor: "#f9f9f9",
+          padding: { xs: 3, sm: 5 },
+          borderRadius: 2,
+          boxShadow: 3,
+          width: "100%",
         }}
       >
-        <Paper elevation={3} sx={{ padding: { xs: 2, sm: 4 }, width: "100%" }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              mb: { xs: 2, sm: 3 },
-            }}
-          >
-            <School
-              sx={{
-                fontSize: { xs: 32, sm: 40 },
-                color: "primary.main",
-                mb: 2,
-              }}
-            />
-            <Typography
-              component="h1"
-              variant="h4"
-              gutterBottom
-              sx={{ fontSize: { xs: "1.75rem", sm: "2.125rem" } }}
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png"
+          alt="Logo"
+          width={60}
+        />
+        <Typography component="h1" variant="h5" fontWeight="bold" mt={2}>
+          EduShare
+        </Typography>
+        <Typography component="p" variant="body1" mt={1} color="text.secondary">
+          Create your account
+        </Typography>
+
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
+          <TextField
+            fullWidth
+            required
+            label="Full Name"
+            name="fullName"
+            margin="normal"
+            value={formData.fullName}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            required
+            label="Email Address"
+            name="email"
+            type="email"
+            margin="normal"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            required
+            label="Password"
+            name="password"
+            type="password"
+            margin="normal"
+            value={formData.password}
+            onChange={handleChange}
+          />
+
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel id="role-label">Role</InputLabel>
+            <Select
+              labelId="role-label"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              label="Role"
             >
-              EduShare
-            </Typography>
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              sx={{
-                fontSize: { xs: "1rem", sm: "1.25rem" },
-                textAlign: "center",
-              }}
-            >
-              Create your account
-            </Typography>
-          </Box>
+              <MenuItem value="student">Student</MenuItem>
+              <MenuItem value="teacher">Teacher</MenuItem>
+            </Select>
+          </FormControl>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+          {formData.role && (
+            <>
+              <FormControl fullWidth required margin="normal">
+                <InputLabel id="branch-label">Branch</InputLabel>
+                <Select
+                  labelId="branch-label"
+                  name="branch"
+                  value={formData.branch}
+                  onChange={handleChange}
+                  label="Branch"
+                >
+                  {BRANCHES.map((branch) => (
+                    <MenuItem key={branch} value={branch}>
+                      {branch}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              {success}
-            </Alert>
-          )}
-
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="Full Name"
-              name="name"
-              autoComplete="name"
-              autoFocus
-              value={formData.name}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
-              inputProps={{
-                maxLength: 8,
-                minLength: 4,
-              }}
-            />
-
-            <FormControl fullWidth margin="normal" required>
-              <InputLabel>Role</InputLabel>
-              <Select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                label="Role"
-              >
-                <MenuItem value="faculty">Teacher</MenuItem>
-                <MenuItem value="student">Student</MenuItem>
-              </Select>
-            </FormControl>
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth margin="normal" required>
-                  <InputLabel>Branch</InputLabel>
+              {formData.role === "student" && (
+                <FormControl fullWidth required margin="normal">
+                  <InputLabel id="year-label">Year</InputLabel>
                   <Select
-                    name="branch"
-                    value={formData.branch}
+                    labelId="year-label"
+                    name="year"
+                    value={formData.year}
                     onChange={handleChange}
-                    label="Branch"
+                    label="Year"
                   >
-                    {BRANCHES.map((branch) => (
-                      <MenuItem key={branch} value={branch}>
-                        {branch}
+                    {CLASSES.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-              </Grid>
-
-              {formData.role === "student" && (
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth margin="normal" required>
-                    <InputLabel>Year</InputLabel>
-                    <Select
-                      name="year"
-                      value={formData.year}
-                      onChange={handleChange}
-                      label="Year"
-                    >
-                      {CLASSES.map((year) => (
-                        <MenuItem key={year} value={year}>
-                          {year}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
               )}
-            </Grid>
+            </>
+          )}
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : "Sign Up"}
-            </Button>
-            <Box sx={{ textAlign: "center" }}>
-              <Link component={RouterLink} to="/login" variant="body2">
-                Already have an account? Sign In
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 3,
+              mb: 2,
+              bgcolor: "#0057D9",
+              ":hover": { bgcolor: "#0045ad" },
+              textTransform: "none",
+              fontWeight: "bold",
+            }}
+          >
+            Sign Up
+          </Button>
+
+          <Typography variant="body2" align="center">
+            Already have an account?{" "}
+            <a href="/login" style={{ textDecoration: "none", color: "#1976d2" }}>
+              Sign In
+            </a>
+          </Typography>
+        </Box>
       </Box>
     </Container>
   );
 };
 
-export default Signup;
+export default SignupForm;
