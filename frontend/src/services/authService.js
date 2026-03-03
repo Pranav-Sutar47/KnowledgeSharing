@@ -37,7 +37,9 @@ class AuthService {
       const response = await axios.post(`${API_URL}/login`, {
         email,
         password
-      });
+      },{withCredentials:true});
+
+      console.log(response);
       
       if (response.data.success) {
         const { accessToken, role, name, email: userEmail, branch, year } = response.data.data;
@@ -63,7 +65,7 @@ class AuthService {
   async signup(userData) {
     try {
       const response = await axios.post(`${API_URL}/signup`, userData);
-      
+      console.log('Response:'+response);
       if (response.data.success) {
         // Store user data from signup response
         const userData = response.data.data.user;

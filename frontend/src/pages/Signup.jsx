@@ -10,20 +10,26 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
+import { useAuth } from '../features/auth/AuthContext';
+import { useNavigate } from "react-router-dom";
+import Alert from '@mui/material/Alert';
+
 
 const BRANCHES = [
-  "Computer",
-  "Mechanical",
-  "Electrical",
-  "Civil",
-  "Electronics",
-  "IT",
+  'Computer Engineering',
+  'Information Technology',
+  'Civil Engineering',
+  'Mechanical Engineering',
+  'Electronics and Telecommunication Engineering',
+  'Computer Science Engineering (AIML)',
+  'Computer Engineering Regional',
+  'Electronics Engineering'
 ];
 const CLASSES = ["FE", "SE", "TE", "BE"];
 
 const SignupForm = () => {
   const [formData, setFormData] = useState({
-    fullName: "",
+    name: "",
     email: "",
     password: "",
     role: "",
@@ -31,8 +37,21 @@ const SignupForm = () => {
     year: "",
   });
 
+  const navigate  = useNavigate();
+
+  const { signup } = useAuth();
+
+  const [alert, setAlert] = useState({
+    open: false,
+    type: "", // success | error
+    message: "",
+  });
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "password" && value.length > 8) return;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -40,10 +59,41 @@ const SignupForm = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const result = await signup(formData);
+
+    if (result.success) {
+      setAlert({
+        open: true,
+        type: "success",
+        message: "Signup successful! Redirecting to login...",
+      });
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+
+    } else {
+      setAlert({
+        open: true,
+        type: "error",
+        message: result.message || "Signup failed",
+      });
+    }
+
+  } catch (err) {
+    setAlert({
+      open: true,
+      type: "error",
+      message: "Something went wrong",
+    });
+  }
+};
+
+
 
   return (
     <Container maxWidth="sm">
@@ -72,14 +122,25 @@ const SignupForm = () => {
           Create your account
         </Typography>
 
+        {alert.open && (
+          <Alert
+            severity={alert.type}
+            variant="outlined"
+            sx={{ width: "100%", mb: 2 }}
+          >
+            {alert.message}
+          </Alert>
+        )}
+
+
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
           <TextField
             fullWidth
             required
             label="Full Name"
-            name="fullName"
+            name="name"
             margin="normal"
-            value={formData.fullName}
+            value={formData.name}
             onChange={handleChange}
           />
           <TextField
@@ -113,7 +174,7 @@ const SignupForm = () => {
               label="Role"
             >
               <MenuItem value="student">Student</MenuItem>
-              <MenuItem value="teacher">Teacher</MenuItem>
+              <MenuItem value="faculty">Teacher</MenuItem>
             </Select>
           </FormControl>
 

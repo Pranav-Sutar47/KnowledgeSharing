@@ -24,12 +24,17 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "password" && value.length > 8) return;
+
+  setFormData({
+    ...formData,
+    [name]: value
+  });
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
