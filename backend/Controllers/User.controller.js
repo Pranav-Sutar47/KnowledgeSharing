@@ -15,6 +15,8 @@ const login = asyncHandler(async(req,res)=>{
 
     const valid = await bcrypt.compare(password,user.password);
 
+    console.log(valid);
+
     if(!valid)
         return res.status(400).json(new APIResponse(401,null,'Password is incorrect'));
         

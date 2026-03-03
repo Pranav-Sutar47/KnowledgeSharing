@@ -16,9 +16,18 @@ app.use(cors({
     credentials: true
 }));
 
+//app.use(cors())
+
 app.use(cookieParser());
 
 app.use(express.json());
+
+app.get("/api/v1/demo", (req, res) => {
+  res.status(200).json({
+    message: "Hello from Demo API"
+  });
+});
+
 
 app.use('/api/v1/user',require('./Routes/User.routes'));
 
