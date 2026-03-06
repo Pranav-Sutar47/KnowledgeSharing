@@ -66,7 +66,7 @@ if (process.env.NODE_ENV === "production") {
     } catch (error) {
       console.error("Self ping failed:", error.message);
     }
-  }, 10 * 60 * 1000);
+  }, 50 * 1000); // every 50 seconds
 }
 
 
