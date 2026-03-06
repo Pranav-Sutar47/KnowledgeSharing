@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const APIError = require('./Utils/APIError');
+const axios = require("axios");
+
 
 const app = express();
 
@@ -22,11 +24,10 @@ app.use(cookieParser());
 
 app.use(express.json());
 
-app.get("/api/v1/demo", (req, res) => {
-  res.status(200).json({
-    message: "Hello from Demo API"
-  });
+app.get("/", (req, res) => {
+  res.send("Server is running");
 });
+
 
 
 app.use('/api/v1/user',require('./Routes/User.routes'));
@@ -53,6 +54,21 @@ app.use((err, req, res, next) => {
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
+
+
+if (process.env.NODE_ENV === "production") {
+  const SELF_URL = process.env.RENDER_EXTERNAL_URL;
+
+  setInterval(async () => {
+    try {
+      const res = await axios.get(SELF_URL);
+      console.log("Self ping success:", res.status);
+    } catch (error) {
+      console.error("Self ping failed:", error.message);
+    }
+  }, 10 * 60 * 1000);
+}
+
 
 app.listen(process.env.PORT,()=>{
     console.log(`Server is up and listing on port ${process.env.PORT}`);

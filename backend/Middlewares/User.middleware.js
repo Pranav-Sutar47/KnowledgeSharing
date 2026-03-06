@@ -5,10 +5,10 @@ const APIError = require('../Utils/APIError');
 const userValidation = asyncHandler((req,res,next)=>{
     const schema = joi.object({
         email: joi.string()
-            .pattern(/^[a-zA-Z0-9._%+-]+@pccoepune\.org$/)
+            .pattern(/^[a-zA-Z0-9._%+-]+@dadscoe\.org$/)
             .required()
             .messages({
-              'string.pattern.base': 'Email must be a valid @pccoepune.org address',
+              'string.pattern.base': 'Email must be a valid @dadscoe.org address',
             }),
         password:joi.string().min(4).max(8).required(),
         name : joi.string().min(5).max(40).required(),
