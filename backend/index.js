@@ -12,7 +12,7 @@ require('dotenv').config();
 require('./Config/DBConnection');
 
 app.use(cors({
-    origin: ['http://127.0.0.1:5173', 'http://localhost:5173','https://edushare-pccoe.netlify.app'],
+    origin: ['http://127.0.0.1:5173', 'http://localhost:5173','https://edushare-dadscoe.netlify.app'],
     methods: "GET, POST, PUT, DELETE",
     allowedHeaders: "Content-Type, Authorization, source",
     credentials: true
