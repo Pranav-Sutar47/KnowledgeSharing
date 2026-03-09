@@ -22,7 +22,7 @@ export const BRANCHES = [
             'Electronic and Computer Science Engineering (ECS)',
             'Computer Science Engineering (AIML)',
             'Mechanical and Mechatronics Engineering',
-            'EComputer Science and Engineering & Artificial Intelligence and Machine Learning',
+            'Computer Science and Engineering & Artificial Intelligence and Machine Learning',
             'Computers Science Engineering'
 ];
 
