@@ -16,14 +16,15 @@ import Alert from '@mui/material/Alert';
 
 
 const BRANCHES = [
-  'Computer Engineering',
-  'Information Technology',
-  'Civil Engineering',
-  'Mechanical Engineering',
-  'Electronics and Telecommunication Engineering',
-  'Computer Science Engineering (AIML)',
-  'Computer Engineering Regional',
-  'Electronics Engineering'
+            'Electrical Engineering',
+            'Artificial Intelligence And Machine Learning (AIML)',
+            'Civil Engineering',
+            'Mechanical Engineering',
+            'Electronic and Computer Science Engineering (ECS)',
+            'Computer Science Engineering (AIML)',
+            'Mechanical and Mechatronics Engineering',
+            'EComputer Science and Engineering & Artificial Intelligence and Machine Learning',
+            'Computers Science Engineering'
 ];
 const CLASSES = ["FE", "SE", "TE", "BE"];
 
