@@ -71,6 +71,7 @@ const StudentDashboard = () => {
     try {
       // Use the faculty-specific API to get teacher's materials
       const result = await materialService.getFacultyMaterials(teacherId);
+      console.log(result.data);
       if (result.success) {
         setTeacherMaterials({
           folders: result.data.folders || [],

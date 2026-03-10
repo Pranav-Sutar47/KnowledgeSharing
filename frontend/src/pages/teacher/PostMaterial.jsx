@@ -99,8 +99,14 @@ const PostMaterial = () => {
       } else {
         submitData.append('access', formData.access);
         if (formData.access === ACCESS_LEVELS.SPECIFIC_BRANCH_OR_CLASS) {
-          submitData.append('allowedBranches', JSON.stringify(formData.allowedBranches));
-          submitData.append('allowedClasses', JSON.stringify(formData.allowedClasses));
+            formData.allowedBranches.forEach(branch => {
+              submitData.append('allowedBranches', branch);
+            });
+            
+            formData.allowedClasses.forEach(cls => {
+              submitData.append('allowedClasses', cls);
+            });
+
         } else {
           submitData.append('allowedBranches', JSON.stringify([]));
           submitData.append('allowedClasses', JSON.stringify([]));
