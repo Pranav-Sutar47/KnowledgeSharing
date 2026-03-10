@@ -8,6 +8,7 @@ const fse = require("fs-extra");
 const UserModel = require("../Models/User.model");
 const FolderModel = require("../Models/Folder.model");
 const streamifier = require("streamifier");
+const mongoose = require('mongoose');
 
 // const addMaterial = asyncHandler(async(req,res)=>{
 //     console.log('alo');
@@ -453,29 +454,37 @@ const getFacultyFoldersAndMaterials = asyncHandler(async (req, res) => {
     throw new APIError(400, "Faculty ID is required");
   }
 
-  let folderFilter = { createdBy: id };
-  let materialFilter = { uploadedBy: id };
+  let materialFilter = { uploadedBy: new mongoose.Types.ObjectId(id) };
+  let folderFilter = { createdBy: new mongoose.Types.ObjectId(id) };
 
   if (user.role === "student") {
     const student = await UserModel.findById(user.id).select("branch year");
 
-  materialFilter.$or = [
-    { access: "allStudents" },
-    {
-      access: "specificBranchOrClass",
-      allowedBranches: student.branch,
-      allowedClasses: student.year,
-    },
-  ];
+    console.log("Branch:"+student.branch+"\nYear:"+student.year);
 
-  folderFilter.$or = [
-    { access: "allStudents" },
-    {
-      access: "specificBranchOrClass",
-      allowedBranches: student.branch,
-      allowedClasses: student.year,
-    },
-  ];
+    const branch = student.branch.trim();
+    const year = student.year.trim();
+
+    materialFilter.$or = [
+      { access: "allStudents" },
+      {
+        access: "specificBranchOrClass",
+        allowedBranches: { $in: [branch] },
+        allowedClasses: { $in: [year] },
+      },
+    ];
+
+    console.log("Material filter:"+materialFilter);
+
+    folderFilter.$or = [
+      { access: "allStudents" },
+      {
+        access: "specificBranchOrClass",
+        allowedBranches: { $in: [branch] },
+        allowedClasses: { $in: [year] },
+      },
+    ];
+
 
   } else {
     // for faculty or admin
